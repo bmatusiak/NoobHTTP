@@ -18,6 +18,11 @@ function getLog(req) {
 
 function NoobHTTP(options) {
     var self = this;
+    
+    this.on404 = function(req, res){return false;};
+    if (options.hasOwnProperty('on404')) {
+        this.on404 = options.on404;
+    } 
 
     this.logEmit = true;
     if (options.hasOwnProperty('logEmit') && !options.logEmit) {
@@ -277,9 +282,11 @@ NoobHTTP.prototype.processRequest = function processRequest(req, res) {
             this.response(filename, res, log);
         }
     } else {
-        self.log(404, log);
-        res.writeHead(404, self.getResponseHeaders({'Content-Type': 'text/plain'}));
-        res.end('File Not Found 404');
+        if(!self.on404(req, res)){
+            self.log(404, log);
+            res.writeHead(404, self.getResponseHeaders({'Content-Type': 'text/plain'}));
+            res.end('File Not Found 404');
+        }
         return;
     }
 
